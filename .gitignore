@@ -1,0 +1,41 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / editor
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+*~
+
+# The Cursor render skill ships with the repo; everything else under .cursor/ stays ignored.
+!.cursor/
+.cursor/*
+!.cursor/skills/
+
+# Node / TypeScript
+node_modules/
+dist/
+.next/
+*.tsbuildinfo
+.turbo/
+
+# Runtime
+sessions/
+coverage/
+*.log
+
+# The standalone skill installs its renderer into its own folder on first run.
+# node_modules/ and sessions/ above already cover it; keep generated locks out too.
+**/skills/*/package-lock.json
+
+# Secrets
+.env
+.env.local
+.env.production
+*.pem
+*.key
+credentials.*
