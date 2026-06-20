@@ -51,7 +51,9 @@ router.get("/sessions", async (_req: Request, res: Response, next) => {
 
 router.delete("/sessions/:id", async (req: Request, res: Response, next) => {
 	try {
-		const deleted = await deleteSession(req.params.id);
+		const { id } = req.params;
+		const sessionId = Array.isArray(id) ? id[0] : id;
+		const deleted = await deleteSession(sessionId);
 		res.json({ deleted });
 	} catch (err) {
 		next(err);
