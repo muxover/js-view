@@ -53,7 +53,12 @@ export class BrowserPool {
 	private async acquireBrowser(): Promise<PooledBrowser> {
 		if (this.closed) throw new Error("Browser pool is closed");
 
-		const free = this.browsers.find((b) => !b.busy);
+		// Drop browsers that have crashed/disconnected before handing one out.
+		this.browsers = this.browsers.filter(
+			(b) => b.busy || b.browser.isConnected(),
+		);
+
+		const free = this.browsers.find((b) => !b.busy && b.browser.isConnected());
 		if (free) {
 			free.busy = true;
 			return free;
@@ -74,8 +79,11 @@ export class BrowserPool {
 		});
 	}
 
-	private async releaseBrowser(entry: PooledBrowser): Promise<void> {
-		entry.uses += 1;
+	private async releaseBrowser(
+		entry: PooledBrowser,
+		countUse = true,
+	): Promise<void> {
+		if (countUse) entry.uses += 1;
 
 		// Recycle browsers that have served their quota to reclaim memory.
 		if (entry.uses >= config.browser.maxUses) {
@@ -139,7 +147,15 @@ export class BrowserPool {
 				release,
 			};
 		} catch (err) {
-			await this.releaseBrowser(entry);
+			// A dead browser would only fail the next caller too — drop it.
+			if (!entry.browser.isConnected()) {
+				this.browsers = this.browsers.filter((b) => b !== entry);
+				const waiter = this.waiters.shift();
+				if (waiter) waiter(await this.createBrowser());
+			} else {
+				// The lease never rendered, so don't spend one of its recycle uses.
+				await this.releaseBrowser(entry, false);
+			}
 			throw err;
 		}
 	}

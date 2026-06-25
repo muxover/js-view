@@ -29,8 +29,12 @@ export function captureNetwork(page: Page): () => CapturedRequest[] {
 			content_type: contentType,
 		};
 
-		// Capture small JSON/text bodies for the agent to inspect.
-		if (contentType && /json|text|javascript/.test(contentType)) {
+		// Capture small JSON/text bodies for the agent to inspect. Skip ones that
+		// advertise a large size so we don't buffer a whole asset for a 4KB preview.
+		const declaredLength = Number(headers["content-length"]);
+		const tooBig =
+			Number.isFinite(declaredLength) && declaredLength > 1_000_000;
+		if (contentType && !tooBig && /json|text|javascript/.test(contentType)) {
 			try {
 				const body = await response.text();
 				entry.body_preview =

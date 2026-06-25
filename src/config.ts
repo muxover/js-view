@@ -52,6 +52,11 @@ export interface Config {
 		poolSize: number;
 		maxUses: number;
 		headful: boolean;
+		noSandbox: boolean;
+	};
+	security: {
+		apiKey: string;
+		blockPrivateHosts: boolean;
 	};
 	stealth: {
 		enabled: boolean;
@@ -59,17 +64,17 @@ export interface Config {
 		randomizeViewport: boolean;
 		proxyUrl: string;
 	};
-  sessionDir: string;
-  queue: {
-    redisUrl: string;
-    name: string;
-    concurrency: number;
-    enabled: boolean;
-  };
-  ocrLang: string;
-  logLevel: string;
-  /** Shut the service down after this many ms with no requests. 0 disables it. */
-  idleShutdownMs: number;
+	sessionDir: string;
+	queue: {
+		redisUrl: string;
+		name: string;
+		concurrency: number;
+		enabled: boolean;
+	};
+	ocrLang: string;
+	logLevel: string;
+	/** Shut the service down after this many ms with no requests. 0 disables it. */
+	idleShutdownMs: number;
 }
 
 export function loadConfig(): Config {
@@ -92,6 +97,11 @@ export function loadConfig(): Config {
 			poolSize: int("BROWSER_POOL_SIZE", 2),
 			maxUses: int("BROWSER_MAX_USES", 50),
 			headful: bool("HEADFUL", false),
+			noSandbox: bool("BROWSER_NO_SANDBOX", true),
+		},
+		security: {
+			apiKey: str("API_KEY", ""),
+			blockPrivateHosts: bool("BLOCK_PRIVATE_HOSTS", true),
 		},
 		stealth: {
 			enabled: bool("STEALTH_ENABLED", true),
@@ -106,10 +116,10 @@ export function loadConfig(): Config {
 			concurrency: int("QUEUE_CONCURRENCY", 2),
 			enabled: redisUrl !== "",
 		},
-    ocrLang: str("OCR_LANG", "eng"),
-    logLevel: str("LOG_LEVEL", "info"),
-    idleShutdownMs: int("IDLE_SHUTDOWN_MS", 0),
-  };
+		ocrLang: str("OCR_LANG", "eng"),
+		logLevel: str("LOG_LEVEL", "info"),
+		idleShutdownMs: int("IDLE_SHUTDOWN_MS", 0),
+	};
 }
 
 export const config = loadConfig();

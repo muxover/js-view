@@ -1,5 +1,6 @@
 import type { ProxyConfig } from "../types.js";
 import { config } from "../config.js";
+import { logger } from "../utils/logger.js";
 
 const VIEWPORTS = [
 	{ width: 1280, height: 720 },
@@ -32,16 +33,19 @@ export function randomViewport(): { width: number; height: number } {
 /** Parse a proxy URL (http://user:pass@host:port) into Playwright proxy config. */
 export function parseProxyUrl(proxyUrl: string): ProxyConfig | undefined {
 	if (!proxyUrl) return undefined;
+	// A bare host:port has no scheme; URL() would otherwise read "host" as one.
+	const hasScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(proxyUrl);
 	try {
-		const u = new URL(proxyUrl);
-		const server = `${u.protocol}//${u.host}`;
-		const cfg: ProxyConfig = { server };
+		const u = new URL(hasScheme ? proxyUrl : `http://${proxyUrl}`);
+		const cfg: ProxyConfig = {
+			server: hasScheme ? `${u.protocol}//${u.host}` : u.host,
+		};
 		if (u.username) cfg.username = decodeURIComponent(u.username);
 		if (u.password) cfg.password = decodeURIComponent(u.password);
 		return cfg;
 	} catch {
-		// Treat a bare host:port as a server with no scheme.
-		return { server: proxyUrl };
+		logger.warn({ proxyUrl }, "Ignoring malformed PROXY_URL");
+		return undefined;
 	}
 }
 

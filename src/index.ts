@@ -3,6 +3,7 @@ import { config } from "./config.js";
 import { createApp } from "./server/app.js";
 import { ensureSessionDir } from "./browser/session.js";
 import { closePool, getPool } from "./browser/pool.js";
+import { closeOcrWorker } from "./render/screenshot.js";
 import { idleMs } from "./server/activity.js";
 import { logger } from "./utils/logger.js";
 
@@ -55,6 +56,7 @@ async function main(): Promise<void> {
 				await closeRedis();
 			}
 			await closePool();
+			await closeOcrWorker();
 		} catch (err) {
 			logger.error({ err }, "Error during shutdown");
 		} finally {
@@ -62,25 +64,25 @@ async function main(): Promise<void> {
 		}
 	};
 
-  process.on("SIGINT", () => void shutdown("SIGINT"));
-  process.on("SIGTERM", () => void shutdown("SIGTERM"));
+	process.on("SIGINT", () => void shutdown("SIGINT"));
+	process.on("SIGTERM", () => void shutdown("SIGTERM"));
 
-  // When auto-started by the skill, the service closes itself once it has been
-  // idle (no requests, no in-flight renders) for the configured window.
-  if (runApi && config.idleShutdownMs > 0) {
-    const checkEvery = Math.min(config.idleShutdownMs, 15_000);
-    const timer = setInterval(() => {
-      if (idleMs() >= config.idleShutdownMs && getPool().stats.busy === 0) {
-        clearInterval(timer);
-        void shutdown("idle");
-      }
-    }, checkEvery);
-    timer.unref();
-    logger.info(
-      { idleShutdownMs: config.idleShutdownMs },
-      "Idle auto-shutdown armed",
-    );
-  }
+	// When auto-started by the skill, the service closes itself once it has been
+	// idle (no requests, no in-flight renders) for the configured window.
+	if (runApi && config.idleShutdownMs > 0) {
+		const checkEvery = Math.min(config.idleShutdownMs, 15_000);
+		const timer = setInterval(() => {
+			if (idleMs() >= config.idleShutdownMs && getPool().stats.busy === 0) {
+				clearInterval(timer);
+				void shutdown("idle");
+			}
+		}, checkEvery);
+		timer.unref();
+		logger.info(
+			{ idleShutdownMs: config.idleShutdownMs },
+			"Idle auto-shutdown armed",
+		);
+	}
 }
 
 main().catch((err) => {

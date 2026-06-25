@@ -5,6 +5,7 @@ import { dispatchRender } from "../render/dispatch.js";
 import { getPool } from "../browser/pool.js";
 import { deleteSession, listSessions } from "../browser/session.js";
 import { renderRateLimiter } from "./middleware/rateLimit.js";
+import { requireApiKey } from "./middleware/auth.js";
 import { HttpError } from "../utils/errors.js";
 import { config } from "../config.js";
 import type { RenderRequest } from "../types.js";
@@ -22,6 +23,7 @@ router.get("/health", (_req: Request, res: Response) => {
 
 router.post(
 	"/render",
+	requireApiKey,
 	renderRateLimiter,
 	async (req: Request, res: Response, next) => {
 		try {
@@ -41,21 +43,29 @@ router.post(
 	},
 );
 
-router.get("/sessions", async (_req: Request, res: Response, next) => {
-	try {
-		res.json({ sessions: await listSessions() });
-	} catch (err) {
-		next(err);
-	}
-});
+router.get(
+	"/sessions",
+	requireApiKey,
+	async (_req: Request, res: Response, next) => {
+		try {
+			res.json({ sessions: await listSessions() });
+		} catch (err) {
+			next(err);
+		}
+	},
+);
 
-router.delete("/sessions/:id", async (req: Request, res: Response, next) => {
-	try {
-		const { id } = req.params;
-		const sessionId = Array.isArray(id) ? id[0] : id;
-		const deleted = await deleteSession(sessionId);
-		res.json({ deleted });
-	} catch (err) {
-		next(err);
-	}
-});
+router.delete(
+	"/sessions/:id",
+	requireApiKey,
+	async (req: Request, res: Response, next) => {
+		try {
+			const { id } = req.params;
+			const sessionId = Array.isArray(id) ? id[0] : id;
+			const deleted = await deleteSession(sessionId);
+			res.json({ deleted });
+		} catch (err) {
+			next(err);
+		}
+	},
+);

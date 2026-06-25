@@ -14,17 +14,22 @@ function registerStealth(): void {
 	stealthRegistered = true;
 }
 
-const LAUNCH_ARGS = [
-	"--no-sandbox",
-	"--disable-setuid-sandbox",
+const BASE_ARGS = [
 	"--disable-dev-shm-usage",
 	"--disable-blink-features=AutomationControlled",
 	"--disable-gpu",
 ];
 
+// The sandbox can't run as root in most containers, so it's off by default;
+// turn it back on (BROWSER_NO_SANDBOX=false) wherever the host allows it.
+const SANDBOX_ARGS = ["--no-sandbox", "--disable-setuid-sandbox"];
+
 export async function launchBrowser(): Promise<Browser> {
 	const headless = !config.browser.headful;
-	const options = { headless, args: LAUNCH_ARGS };
+	const args = config.browser.noSandbox
+		? [...SANDBOX_ARGS, ...BASE_ARGS]
+		: BASE_ARGS;
+	const options = { headless, args };
 
 	if (config.stealth.enabled) {
 		registerStealth();

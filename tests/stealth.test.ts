@@ -16,6 +16,14 @@ describe("parseProxyUrl", () => {
 	it("returns undefined for empty input", () => {
 		expect(parseProxyUrl("")).toBeUndefined();
 	});
+
+	it("accepts a bare host:port", () => {
+		expect(parseProxyUrl("host:8080")?.server).toBe("host:8080");
+	});
+
+	it("returns undefined for a malformed proxy", () => {
+		expect(parseProxyUrl("not a proxy at all")).toBeUndefined();
+	});
 });
 
 describe("randomViewport", () => {

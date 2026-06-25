@@ -17,8 +17,7 @@ export function errorHandler(
 	}
 
 	logger.error({ err }, "Unhandled error");
-	const message = err instanceof Error ? err.message : "Internal server error";
-	res.status(500).json({ error: message });
+	res.status(500).json({ error: "Internal server error" });
 }
 
 export function notFound(_req: Request, res: Response): void {

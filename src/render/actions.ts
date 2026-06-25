@@ -1,6 +1,6 @@
 import type { Page } from "playwright";
 import type { RenderAction } from "../types.js";
-import { toLoadState } from "./waitStrategies.js";
+import { assertPublicUrl } from "../security/url.js";
 import { logger } from "../utils/logger.js";
 
 export interface ActionStats {
@@ -81,8 +81,9 @@ export async function runActions(
 				break;
 			}
 			case "navigate": {
+				await assertPublicUrl(action.url);
 				await page.goto(action.url, {
-					waitUntil: toLoadState(action.wait_until ?? "networkidle"),
+					waitUntil: action.wait_until ?? "networkidle",
 					timeout: timeoutMs,
 				});
 				break;

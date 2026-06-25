@@ -2,11 +2,12 @@ import type { RenderRequest, RenderResponse } from "../types.js";
 import { config } from "../config.js";
 import { getPool } from "../browser/pool.js";
 import { saveSessionState } from "../browser/session.js";
-import { toLoadState, waitForReady } from "./waitStrategies.js";
+import { waitForReady } from "./waitStrategies.js";
 import { runActions } from "./actions.js";
 import { captureNetwork } from "./network.js";
 import { captureScreenshot } from "./screenshot.js";
 import { trackTabs, collectTabUrls } from "./tabs.js";
+import { assertPublicUrl, installUrlGuard } from "../security/url.js";
 import { extractContent } from "../extract/index.js";
 import { HttpError, withTimeout } from "../utils/errors.js";
 import { logger } from "../utils/logger.js";
@@ -18,6 +19,7 @@ function clampTimeout(requested?: number): number {
 
 export async function render(req: RenderRequest): Promise<RenderResponse> {
 	const started = Date.now();
+	await assertPublicUrl(req.url);
 	const timeoutMs = clampTimeout(req.timeout_ms);
 	const waitUntil = req.wait_until ?? config.defaults.waitUntil;
 	const outputFormat = req.output_format ?? config.defaults.outputFormat;
@@ -60,6 +62,7 @@ async function runRender(
 	opts: RenderOpts,
 ): Promise<RenderResponse> {
 	const { context } = lease;
+	await installUrlGuard(context);
 	const page = await context.newPage();
 	page.setDefaultTimeout(opts.timeoutMs);
 
@@ -69,7 +72,7 @@ async function runRender(
 	let statusCode: number | undefined;
 	try {
 		const response = await page.goto(req.url, {
-			waitUntil: toLoadState(req.wait_until ?? "networkidle"),
+			waitUntil: req.wait_until ?? "networkidle",
 			timeout: opts.timeoutMs,
 		});
 		statusCode = response?.status();

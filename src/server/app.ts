@@ -7,16 +7,16 @@ import { touch } from "./activity.js";
 import { logger } from "../utils/logger.js";
 
 export function createApp(): Express {
-  const app = express();
+	const app = express();
 
-  app.use((_req, _res, next) => {
-    touch();
-    next();
-  });
-  app.use(pinoHttp({ logger }));
-  app.use(express.json({ limit: "1mb" }));
+	app.use((_req, _res, next) => {
+		touch();
+		next();
+	});
+	app.use(pinoHttp({ logger }));
+	app.use(express.json({ limit: "1mb" }));
 
-  app.use(router);
+	app.use(router);
 
 	app.use(notFound);
 	app.use(errorHandler);

@@ -1,5 +1,21 @@
 import { z } from "zod";
 
+const ALLOWED_SCHEMES = ["http:", "https:", "data:"];
+
+const requestUrl = z
+	.string()
+	.url()
+	.refine(
+		(u) => {
+			try {
+				return ALLOWED_SCHEMES.includes(new URL(u).protocol);
+			} catch {
+				return false;
+			}
+		},
+		{ message: "URL scheme must be http, https, or data" },
+	);
+
 const scrollAction = z.object({
 	type: z.literal("scroll"),
 	count: z.number().int().min(1).max(100).optional(),
@@ -27,7 +43,7 @@ const waitAction = z.object({
 
 const navigateAction = z.object({
 	type: z.literal("navigate"),
-	url: z.string().url(),
+	url: requestUrl,
 	wait_until: z
 		.enum(["load", "domcontentloaded", "networkidle", "commit"])
 		.optional(),
@@ -48,7 +64,7 @@ const proxy = z.object({
 });
 
 export const renderRequestSchema = z.object({
-	url: z.string().url(),
+	url: requestUrl,
 	wait_until: z
 		.enum(["load", "domcontentloaded", "networkidle", "commit"])
 		.optional(),

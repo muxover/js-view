@@ -146,11 +146,14 @@ Everything is set through environment variables; [.env.example](.env.example) ha
 | `JSVIEW_ROLE` | `all` | `api`, `worker`, or `all` |
 | `PORT` | `8080` | HTTP listen port |
 | `RATE_LIMIT_MAX` | `60` | Requests per window per IP |
+| `API_KEY` | - | Require this key on `/render` and `/sessions` (bearer or `x-api-key`); empty leaves them open |
+| `BLOCK_PRIVATE_HOSTS` | `true` | Refuse to fetch localhost / private-network addresses (SSRF guard) |
 | `DEFAULT_TIMEOUT_MS` | `15000` | Default per-render timeout |
 | `MAX_TIMEOUT_MS` | `60000` | Hard ceiling on a render timeout |
 | `BROWSER_POOL_SIZE` | `2` | Browser contexts per worker |
 | `BROWSER_MAX_USES` | `50` | Renders before a browser is recycled |
 | `HEADFUL` | `false` | Run a visible browser |
+| `BROWSER_NO_SANDBOX` | `true` | Launch Chromium with `--no-sandbox` (needed as root in containers) |
 | `STEALTH_ENABLED` | `true` | Apply stealth evasions |
 | `RANDOMIZE_VIEWPORT` | `true` | Jitter the viewport per render |
 | `PROXY_URL` | - | Default proxy, e.g. `http://user:pass@host:port` |
@@ -174,7 +177,7 @@ JSView/
 │   │   ├── app.ts            # Express app + middleware wiring
 │   │   ├── routes.ts         # /render, /health, /sessions routes
 │   │   ├── schema.ts         # zod request validation
-│   │   └── middleware/       # Rate limiting and error handling
+│   │   └── middleware/       # API-key auth, rate limiting, error handling
 │   ├── browser/
 │   │   ├── launch.ts         # Stealth Chromium launch
 │   │   ├── pool.ts           # Bounded context pool with recycling
@@ -195,6 +198,8 @@ JSView/
 │   │   ├── text.ts           # Text normalization
 │   │   ├── links.ts          # Absolute link extraction
 │   │   └── metadata.ts       # Title / description / OpenGraph
+│   ├── security/
+│   │   └── url.ts            # URL scheme allowlist + SSRF private-host guard
 │   ├── queue/
 │   │   ├── connection.ts     # Shared Redis connection
 │   │   ├── queue.ts          # BullMQ producer

@@ -2,13 +2,6 @@ import type { Page } from "playwright";
 import type { WaitUntil } from "../types.js";
 import { logger } from "../utils/logger.js";
 
-/** Map our public wait_until value to Playwright's goto load-state. */
-export function toLoadState(
-	waitUntil: WaitUntil,
-): "load" | "domcontentloaded" | "networkidle" | "commit" {
-	return waitUntil;
-}
-
 /**
  * Wait for the page to be "ready" according to the requested strategy, and
  * optionally for a specific selector to appear. Failures here are non-fatal:
