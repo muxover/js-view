@@ -1,0 +1,20 @@
+{
+  "name": "js-view",
+  "interface": {
+    "displayName": "JS-View"
+  },
+  "plugins": [
+    {
+      "name": "js-view",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+jobs:
+  markdownlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: DavidAnson/markdownlint-cli2-action@v24
+        with:
+          globs: "**/*.md"
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    env:
+      REDIS_URL: redis://localhost:6379
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22", "24"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+      - name: Package contents
+        run: npm pack --dry-run
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t js-view .
+      - name: Render through the container
+        run: |
+          docker run -d --name js-view -p 8080:8080 js-view
+          for i in $(seq 1 30); do curl -fs localhost:8080/health && break; sleep 1; done
+          cat > body.json <<'JSON'
+          {"url": "data:text/html,<div id=r></div><script>r.textContent = 'rendered by js'</script>", "output_format": "text", "clean": false}
+          JSON
+          curl -fs localhost:8080/render -H 'content-type: application/json' -d @body.json | tee out.json
+          grep -q "rendered by js" out.json
+      - if: failure()
+        run: docker logs js-view

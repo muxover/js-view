@@ -1,0 +1,15 @@
+{
+  "name": "js-view",
+  "description": "JS-View by Jax (muxover)",
+  "owner": {
+    "name": "Jax",
+    "url": "https://github.com/muxover"
+  },
+  "plugins": [
+    {
+      "name": "js-view",
+      "source": "./",
+      "description": "Read JavaScript-rendered pages with a real browser: render, screenshot, links, and API-call capture."
+    }
+  ]
+}

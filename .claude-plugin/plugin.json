@@ -1,0 +1,19 @@
+{
+  "name": "js-view",
+  "version": "0.1.0",
+  "description": "Read JavaScript-rendered pages with a real browser: render, screenshot, links, and API-call capture as MCP tools, plus a skill that tells the agent when to use them.",
+  "author": {
+    "name": "Jax",
+    "url": "https://github.com/muxover"
+  },
+  "homepage": "https://github.com/muxover/js-view",
+  "repository": "https://github.com/muxover/js-view",
+  "license": "MIT",
+  "keywords": ["browser", "scraping", "spa", "markdown", "screenshot", "mcp", "skill"],
+  "mcpServers": {
+    "js-view": {
+      "command": "npx",
+      "args": ["-y", "@muxover/js-view@0.1.0", "mcp"]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "js-view": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@muxover/js-view@0.1.0", "mcp"]
+    }
+  }
+}

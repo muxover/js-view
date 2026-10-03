@@ -1,0 +1,84 @@
+{
+  "name": "@muxover/js-view",
+  "version": "0.1.0",
+  "description": "Render JavaScript-heavy pages in a real browser so AI agents can read them. CLI, MCP server, and HTTP service.",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "headless-browser",
+    "playwright",
+    "scraper",
+    "markdown",
+    "ai-agents",
+    "claude-code",
+    "codex",
+    "cursor",
+    "spa"
+  ],
+  "homepage": "https://github.com/muxover/js-view#readme",
+  "bugs": {
+    "url": "https://github.com/muxover/js-view/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muxover/js-view.git"
+  },
+  "license": "MIT",
+  "author": "Jax (https://github.com/muxover)",
+  "type": "module",
+  "bin": {
+    "js-view": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "dev:worker": "cross-env JSVIEW_ROLE=worker tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "worker": "cross-env JSVIEW_ROLE=worker node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . && prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.1",
+    "@mozilla/readability": "^0.6.0",
+    "bullmq": "^5.12.0",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "ioredis": "^5.4.1",
+    "jsdom": "^29.1.1",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "playwright": "1.63.0",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "tesseract.js": "^7.0.0",
+    "turndown": "^7.2.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/express": "^5.0.6",
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^26.0.0",
+    "@types/turndown": "^5.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/parser": "^8.61.1",
+    "cross-env": "^10.1.0",
+    "eslint": "^10.5.0",
+    "globals": "^16.5.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.16.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
